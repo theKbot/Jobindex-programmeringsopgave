@@ -80,9 +80,22 @@ namespace Jobindex_programmeringsopgave
                         bool isTaken = false;
                         foreach (string g in groups)
                         {
-                            if (g.All(x => keys.Contains(g)))
+                            bool isFound = false;
+                            foreach(char c in g)
                             {
-                                isTaken = true;
+                                if(keys.Contains(c))
+                                {
+                                    isFound = true;
+                                }
+                                else
+                                {
+                                    isFound = false;
+                                    break;
+                                }
+                            }
+                            if (!isFound) { isTaken = false; }
+                            else { isTaken = true;
+                                break;
                             }
                         }
                         if (!isTaken)
@@ -92,51 +105,15 @@ namespace Jobindex_programmeringsopgave
                         }
                     }
                 }
-
-                //Lav alle mulige kombinationer, startende med de mindste
-                /*for (int i = 0; i < rel_persons.Count()-1; i++)
-                {
-                    for (int j = 0; j < rel_persons.Count(); j++)
-                    {
-                        for (int k = 0; k < rel_persons.Count(); k++)
-                        {
-                            if (k != j)
-                            {
-                                string conc = "";
-                                //TODO: increase search width (rel_person[k+0,1,2,3 osv]).
-                                conc += rel_persons[j].Value;
-                                conc += rel_persons[k].Value;
-
-                                //Tjek, om gruppen indeholder alle krævede kvalifikationer
-                                if (CheckGroup(conc, input))
-                                {
-                                    bool isTaken = false;
-                                    foreach (string g in groups)
-                                    {
-                                        //Hvis et subset af gruppen allerede er en gruppe, lad da vær med at tilføje den, da den ikke er minimal
-                                        if (g.Contains(rel_persons[j].Key) && g.Contains(rel_persons[k].Key))
-                                        {
-                                            isTaken = true;
-                                        }
-                                    }
-                                    if (!isTaken)
-                                    {
-                                        groups.Add(rel_persons[j].Key + "," + rel_persons[k].Key);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }*/
-
+                //Print grupperne
                 foreach (string g in groups)
                 {
                     Console.WriteLine(g);
                 }
 
 
-                    //--------------------------------//
-                    Console.WriteLine("____________________________");
+                //--------------------------------//
+                Console.WriteLine("____________________________");
                 foreach (KeyValuePair<string, string> person in list)
                 {
                     List<string> f = req_areas.Where(x => person.Value.Contains(x)).ToList();

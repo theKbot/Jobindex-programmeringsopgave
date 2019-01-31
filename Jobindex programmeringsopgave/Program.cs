@@ -48,12 +48,53 @@ namespace Jobindex_programmeringsopgave
                         rel_persons.Add(person);
                     }
                 }
-
+                //Lav string af keys fra alle relevante personer
+                String rel_keys = "";
+                foreach(KeyValuePair<String, String> person in rel_persons)
+                {
+                    rel_keys += person.Key;
+                }
+                //Lav powerset af alle relevante keys
+                List<string> pe = PowerSet(rel_keys);
+                //Lav liste til at lagre returnerede grupper
                 List<String> groups = new List<string>();
-                int startOffset = 0;
-                int searchWidth = 0;
+                //Sortér af længden af power set værdier, således at de mindste (minimale) kommer først
+                foreach (string s in SortByLength(pe))
+                {
+                    //Console.WriteLine(s);
+                    //Lav en concat af alle kvalifikationer fra fundne subset
+                    string quals = "";
+                    string keys = "";
+                    foreach(char c in s)
+                    {
+                        var p = rel_persons.Find(x => x.Key == c.ToString());
+                        //Tilføj personers key til keys
+                        keys += p.Key;
+                        //Tilføj personers kvalifikationer til conc
+                        quals += p.Value;
+                    }
+
+                    //Tjek om nuværende liste overholder kravene
+                    if (CheckGroup(quals, input))
+                    {
+                        bool isTaken = false;
+                        foreach (string g in groups)
+                        {
+                            if (g.All(x => keys.Contains(g)))
+                            {
+                                isTaken = true;
+                            }
+                        }
+                        if (!isTaken)
+                        {
+                            groups.Add(s);
+                            //Console.WriteLine("#");
+                        }
+                    }
+                }
+
                 //Lav alle mulige kombinationer, startende med de mindste
-                for (int i = 0; i < rel_persons.Count()-1; i++)
+                /*for (int i = 0; i < rel_persons.Count()-1; i++)
                 {
                     for (int j = 0; j < rel_persons.Count(); j++)
                     {
@@ -86,8 +127,7 @@ namespace Jobindex_programmeringsopgave
                             }
                         }
                     }
-                    
-                }
+                }*/
 
                 foreach (string g in groups)
                 {
@@ -122,6 +162,38 @@ namespace Jobindex_programmeringsopgave
                 }
             }
             return true;
+        }
+
+        private static List<string> PowerSet(string input)
+        {
+            int n = input.Length;
+            // Power set contains 2^N subsets.
+            int powerSetCount = 1 << n;
+            var ans = new List<string>();
+
+            for (int setMask = 0; setMask < powerSetCount; setMask++)
+            {
+                var s = new StringBuilder();
+                for (int i = 0; i < n; i++)
+                {
+                    // Checking whether i'th element of input collection should go to the current subset.
+                    if ((setMask & (1 << i)) > 0)
+                    {
+                        s.Append(input[i]);
+                    }
+                }
+                ans.Add(s.ToString());
+            }
+            return ans;
+        }
+
+        static IEnumerable<string> SortByLength(IEnumerable<string> e)
+        {
+            // Use LINQ to sort the array received and return a copy.
+            var sorted = from s in e
+                         orderby s.Length ascending
+                         select s;
+            return sorted;
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Jobindex_programmeringsopgave
                         {
                             if (k != j)
                             {
-                                string conc = "";f
+                                string conc = "";
                                 //TODO: increase search width (rel_person[k+0,1,2,3 osv]).
                                 conc += rel_persons[j].Value;
                                 conc += rel_persons[k].Value;

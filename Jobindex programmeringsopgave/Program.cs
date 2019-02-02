@@ -38,7 +38,6 @@ namespace Jobindex_programmeringsopgave
         static List<String> GenerateGroups(List<KeyValuePair<string, string>> list, string input)
         {
             List<String> req_areas = input.Split(',').ToList();
-            List<String> foundGroups = new List<string>();
 
             //Lav liste over alle relevante personer (i.e. personer med mindst én af de givne kvalifikationer).
             List<KeyValuePair<string, string>> rel_persons = new List<KeyValuePair<string, string>>();
@@ -63,7 +62,7 @@ namespace Jobindex_programmeringsopgave
             //Sortér af længden af power set værdier, således at de mindste (minimale) kommer først
             foreach (string s in SortByLength(ps))
             {
-                //Lav en string af alle kvalifikationer fra fundne subset
+                //Lav en string af alle kvalifikationer fra fundne subset samt keys
                 string quals = "";
                 string keys = "";
                 foreach (char c in s)
@@ -90,6 +89,7 @@ namespace Jobindex_programmeringsopgave
                             }
                             else
                             {
+                                //Hvis en key i 'keys' ikke eksisterer i en gruppe, så er det ikke et subset. 
                                 isFound = false;
                                 break;
                             }
@@ -109,12 +109,6 @@ namespace Jobindex_programmeringsopgave
                 }
             }
 
-            //Tilføj grupper til liste 
-            foreach (string g in groups)
-            {
-                foundGroups.Add(g);
-            }
-
 
             //--------------------------------//
             Console.WriteLine("RELEVANT PEOPLE FOUND:");
@@ -130,7 +124,7 @@ namespace Jobindex_programmeringsopgave
             }
             Console.WriteLine("____________________________");
 
-            return foundGroups;
+            return groups;
         }
 
         static bool CheckGroup(string toTest, string input)

@@ -10,10 +10,7 @@ namespace Jobindex_programmeringsopgave
     {
         static void Main(string[] args)
         {
-            //string input = "a,b,d,e,i,l,n,o,r,s,t";
-            string input = "l,q,s";
-        
-
+            string input = "a,b,d,e,i,l,n,o,r,s,t";
 
             var list = new List<KeyValuePair<string, string>>()
             {
@@ -23,110 +20,117 @@ namespace Jobindex_programmeringsopgave
                 new KeyValuePair<string, string>("D", "k,l,m,n,o,p,q,r"),
                 new KeyValuePair<string, string>("E", "n,o,p,q,r,s,t,u"),
                 new KeyValuePair<string, string>("F", "a,b,c,r,s,t,u,v,w,x,y,z"),
-                new KeyValuePair<string, string>("G", "a,e,o,u,y"),
+                new KeyValuePair<string, string>("G", "a,e,i,o,u,y"),
                 new KeyValuePair<string, string>("H", "b,c,e,g,k,m,q,s,x")
             };
 
-            List<string> groups = GenerateGroups(list, input);
+            List<String> groups = GenerateGroups(list, input);
+
+            //Print grupper
+            Console.WriteLine("Minimal groups: ");
+            foreach(string group in groups)
+            {
+                Console.WriteLine(group);
+            }
         }
 
+        //Genererer grupper og returnerer dem som strings i en liste
         static List<String> GenerateGroups(List<KeyValuePair<string, string>> list, string input)
         {
             List<String> req_areas = input.Split(',').ToList();
-            List<List<String>> foundGroups = new List<List<string>>();
-            
-            bool fin = false;
-            while (!fin)
-            {
-                //Lav liste over alle relevante personer (i.e. personer med givne kvalifikationer).
-                List<KeyValuePair<string, string>> rel_persons = new List<KeyValuePair<string, string>>();
-                foreach (KeyValuePair<string, string> person in list)
-                {
-                    List<string> rel_ares = req_areas.Where(x => person.Value.Contains(x)).ToList();
-                    if (rel_ares.Count() > 0)
-                    {
-                        rel_persons.Add(person);
-                    }
-                }
-                //Lav string af keys fra alle relevante personer
-                String rel_keys = "";
-                foreach(KeyValuePair<String, String> person in rel_persons)
-                {
-                    rel_keys += person.Key;
-                }
-                //Lav powerset af alle relevante keys
-                List<string> pe = PowerSet(rel_keys);
-                //Lav liste til at lagre returnerede grupper
-                List<String> groups = new List<string>();
-                //Sortér af længden af power set værdier, således at de mindste (minimale) kommer først
-                foreach (string s in SortByLength(pe))
-                {
-                    //Console.WriteLine(s);
-                    //Lav en concat af alle kvalifikationer fra fundne subset
-                    string quals = "";
-                    string keys = "";
-                    foreach(char c in s)
-                    {
-                        var p = rel_persons.Find(x => x.Key == c.ToString());
-                        //Tilføj personers key til keys
-                        keys += p.Key;
-                        //Tilføj personers kvalifikationer til conc
-                        quals += p.Value;
-                    }
+            List<String> foundGroups = new List<string>();
 
-                    //Tjek om nuværende liste overholder kravene
-                    if (CheckGroup(quals, input))
+            //Lav liste over alle relevante personer (i.e. personer med mindst én af de givne kvalifikationer).
+            List<KeyValuePair<string, string>> rel_persons = new List<KeyValuePair<string, string>>();
+            foreach (KeyValuePair<string, string> person in list)
+            {
+                List<string> rel_ares = req_areas.Where(x => person.Value.Contains(x)).ToList();
+                if (rel_ares.Count() > 0)
+                {
+                    rel_persons.Add(person);
+                }
+            }
+            //Lav string af keys fra alle relevante personer
+            String rel_keys = "";
+            foreach (KeyValuePair<String, String> person in rel_persons)
+            {
+                rel_keys += person.Key;
+            }
+            //Lav powerset af alle relevante keys
+            List<string> ps = PowerSet(rel_keys);
+            //Lav liste til at lagre returnerede grupper
+            List<String> groups = new List<string>();
+            //Sortér af længden af power set værdier, således at de mindste (minimale) kommer først
+            foreach (string s in SortByLength(ps))
+            {
+                //Lav en string af alle kvalifikationer fra fundne subset
+                string quals = "";
+                string keys = "";
+                foreach (char c in s)
+                {
+                    var p = rel_persons.Find(x => x.Key == c.ToString());
+                    //Tilføj personers key til keys
+                    keys += p.Key;
+                    //Tilføj personers kvalifikationer til quals
+                    quals += p.Value;
+                }
+
+                //Tjek om nuværende liste overholder kravene
+                if (CheckGroup(quals, input))
+                {
+                    bool isTaken = false;
+                    foreach (string g in groups)
                     {
-                        bool isTaken = false;
-                        foreach (string g in groups)
+                        bool isFound = false;
+                        foreach (char c in g)
                         {
-                            bool isFound = false;
-                            foreach(char c in g)
+                            if (keys.Contains(c))
                             {
-                                if(keys.Contains(c))
-                                {
-                                    isFound = true;
-                                }
-                                else
-                                {
-                                    isFound = false;
-                                    break;
-                                }
+                                isFound = true;
                             }
-                            if (!isFound) { isTaken = false; }
-                            else { isTaken = true;
+                            else
+                            {
+                                isFound = false;
                                 break;
                             }
                         }
-                        if (!isTaken)
+                        if (!isFound) { isTaken = false; }
+                        else
                         {
-                            groups.Add(s);
-                            //Console.WriteLine("#");
+                            isTaken = true;
+                            //Console.WriteLine(keys + " Is a subset of: " + g);
+                            break;
                         }
                     }
-                }
-                //Print grupperne
-                foreach (string g in groups)
-                {
-                    Console.WriteLine(g);
-                }
-
-
-                //--------------------------------//
-                Console.WriteLine("____________________________");
-                foreach (KeyValuePair<string, string> person in list)
-                {
-                    List<string> f = req_areas.Where(x => person.Value.Contains(x)).ToList();
-                    Console.Write(person.Key + ": ");
-                    foreach (string s in f)
+                    if (!isTaken)
                     {
-                        Console.Write(s);
+                        groups.Add(s);
                     }
-                    Console.WriteLine();
                 }
-                fin = true;
             }
-            return null;
+
+            //Tilføj grupper til liste 
+            foreach (string g in groups)
+            {
+                foundGroups.Add(g);
+            }
+
+
+            //--------------------------------//
+            Console.WriteLine("RELEVANT PEOPLE FOUND:");
+            foreach (KeyValuePair<string, string> person in list)
+            {
+                List<string> f = req_areas.Where(x => person.Value.Contains(x)).ToList();
+                Console.Write(person.Key + ": ");
+                foreach (string s in f)
+                {
+                    Console.Write(s);
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine("____________________________");
+
+            return foundGroups;
         }
 
         static bool CheckGroup(string toTest, string input)
@@ -166,7 +170,7 @@ namespace Jobindex_programmeringsopgave
 
         static IEnumerable<string> SortByLength(IEnumerable<string> e)
         {
-            // Use LINQ to sort the array received and return a copy.
+            // Ved hjælp af LINQ, sortér listen via længde
             var sorted = from s in e
                          orderby s.Length ascending
                          select s;
@@ -174,69 +178,3 @@ namespace Jobindex_programmeringsopgave
         }
     }
 }
-
-//Legacy code
-//For hver person, fjern fra listen, tjek om kravene stadig holder
-/*                int ite = 0;
-                bool newGroup = false;
-for (int i = 0; i<rel_persons.Count(); i++)
-                {
-                    List<KeyValuePair<String, String>> groups = new List<KeyValuePair<string, string>>();
-                    string checkedKeys = "";
-                    string qual = "";
-                    for (int j = 0; j < rel_persons.Count(); j++)
-                    {
-                        groups.Add(rel_persons[j]);
-                        
-                        qual += rel_persons[j].Value;
-                        if (CheckComplete(qual, input))
-                        {
-                            
-                            var tmp = groups.ToList();
-                            for (int k = 0; k < groups.Count(); k++)
-                            {
-                                newGroup = false;
-                                if(k==i || checkedKeys.Contains(groups[k].Key))
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    checkedKeys += rel_persons[k].Key;
-                                }
-                                tmp.Remove(rel_persons[k]);
-
-                                string tmpQuals = "";
-                                foreach(KeyValuePair<String, String> p in tmp)
-                                {
-                                    tmpQuals += p.Value;
-                                }
-                                if (!CheckComplete(tmpQuals, input))
-                                {
-                                    tmp.Add(rel_persons[k]);
-                                    groups.Remove(rel_persons[k]);
-                                    newGroup = true;
-                                }
-                                
-                            }
-                            if (newGroup)
-                            {
-                                foreach (KeyValuePair<String, String> k in tmp)
-                                {
-                                    Console.Write(k.Key);
-                                }
-                                Console.WriteLine();
-                            }
-                        }
-                    }
-                    qual = "";
-
-                    //---Print result---//
-                    /*foreach (KeyValuePair<string, string> pe in tmp)
-                    {
-                        Console.Write(pe.Key);
-                    }
-                    Console.WriteLine();
-
-                    ite++;
-                }*/
